@@ -265,13 +265,13 @@ public class SignalServiceAccountManager {
       throws IOException, Quote.InvalidQuoteFormatException, UnauthenticatedQuoteException, SignatureException, UnauthenticatedResponseException
   {
     try {
-      String            authorizationToken = this.pushServiceSocket.getContactDiscoveryAuthorization();
-      Curve25519        curve              = Curve25519.getInstance(Curve25519.BEST);
-      Curve25519KeyPair keyPair            = curve.generateKeyPair();
+      String            authorization = this.pushServiceSocket.getContactDiscoveryAuthorization();
+      Curve25519        curve         = Curve25519.getInstance(Curve25519.BEST);
+      Curve25519KeyPair keyPair       = curve.generateKeyPair();
 
       ContactDiscoveryCipher                        cipher              = new ContactDiscoveryCipher();
       RemoteAttestationRequest                      attestationRequest  = new RemoteAttestationRequest(keyPair.getPublicKey());
-      Pair<RemoteAttestationResponse, List<String>> attestationResponse = this.pushServiceSocket.getContactDiscoveryRemoteAttestation(authorizationToken, attestationRequest, mrenclave);
+      Pair<RemoteAttestationResponse, List<String>> attestationResponse = this.pushServiceSocket.getContactDiscoveryRemoteAttestation(authorization, attestationRequest, mrenclave);
 
       RemoteAttestationKeys keys      = new RemoteAttestationKeys(keyPair, attestationResponse.first().getServerEphemeralPublic(), attestationResponse.first().getServerStaticPublic());
       Quote                 quote     = new Quote(attestationResponse.first().getQuote());
@@ -288,7 +288,7 @@ public class SignalServiceAccountManager {
       }
 
       DiscoveryRequest  request  = cipher.createDiscoveryRequest(addressBook, remoteAttestation);
-      DiscoveryResponse response = this.pushServiceSocket.getContactDiscoveryRegisteredUsers(authorizationToken, request, attestationResponse.second(), mrenclave);
+      DiscoveryResponse response = this.pushServiceSocket.getContactDiscoveryRegisteredUsers(authorization, request, attestationResponse.second(), mrenclave);
       byte[]            data     = cipher.getDiscoveryResponseData(response, remoteAttestation);
 
       Iterator<String> addressBookIterator = addressBook.iterator();

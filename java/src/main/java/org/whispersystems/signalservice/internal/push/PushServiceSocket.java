@@ -73,6 +73,7 @@ import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
 import okhttp3.ConnectionSpec;
+import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -444,13 +445,14 @@ public class PushServiceSocket {
 
   public String getContactDiscoveryAuthorization() throws IOException {
     String response = makeServiceRequest(DIRECTORY_AUTH_PATH, "GET", null);
-    return JsonUtil.fromJson(response, AuthorizationToken.class).getToken();
+    AuthorizationToken token = JsonUtil.fromJson(response, AuthorizationToken.class);
+    return Credentials.basic(token.getUsername(), token.getToken());
   }
 
-  public Pair<RemoteAttestationResponse, List<String>> getContactDiscoveryRemoteAttestation(String authorizationToken, RemoteAttestationRequest request, String mrenclave)
+  public Pair<RemoteAttestationResponse, List<String>> getContactDiscoveryRemoteAttestation(String authorization, RemoteAttestationRequest request, String mrenclave)
       throws IOException
   {
-    Response     response   = makeContactDiscoveryRequest(authorizationToken, new LinkedList<String>(), "/v1/attestation/" + mrenclave, "GET", JsonUtil.toJson(request));
+    Response     response   = makeContactDiscoveryRequest(authorization, new LinkedList<String>(), "/v1/attestation/" + mrenclave, "PUT", JsonUtil.toJson(request));
     ResponseBody body       = response.body();
     List<String> rawCookies = response.headers("Set-Cookie");
     List<String> cookies    = new LinkedList<>();
