@@ -888,6 +888,8 @@ public class PushServiceSocket {
     try {
       response = call.execute();
 
+      Log.e("SPIDERMAN", "response: " + response.toString());
+
       if (response.isSuccessful()) {
         return response;
       }

@@ -12,6 +12,7 @@ import org.threeten.bp.Period;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
+import org.whispersystems.libsignal.logging.Log;
 import org.whispersystems.libsignal.util.ByteUtil;
 import org.whispersystems.signalservice.internal.contacts.entities.DiscoveryRequest;
 import org.whispersystems.signalservice.internal.contacts.entities.DiscoveryResponse;
@@ -27,9 +28,13 @@ import java.security.MessageDigest;
 import java.security.SignatureException;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.List;
 
 public class ContactDiscoveryCipher {
+
+  private static final int MAC_LENGTH_BYTES = 16;
+  private static final int MAC_LENGTH_BITS  = MAC_LENGTH_BYTES * 8;
 
   public DiscoveryRequest createDiscoveryRequest(List<String> addressBook, RemoteAttestation remoteAttestation) {
     try {
@@ -43,16 +48,29 @@ public class ContactDiscoveryCipher {
       byte[]         nonce       = Util.getSecretBytes(12);
       GCMBlockCipher cipher      = new GCMBlockCipher(new AESFastEngine());
 
-      cipher.init(true, new AEADParameters(new KeyParameter(remoteAttestation.getKeys().getClientKey()), 128, nonce));
+      cipher.init(true, new AEADParameters(new KeyParameter(remoteAttestation.getKeys().getClientKey()), MAC_LENGTH_BITS, nonce));
       cipher.processAADBytes(remoteAttestation.getRequestId(), 0, remoteAttestation.getRequestId().length);
 
-      byte[] ciphertext = new byte[cipher.getUpdateOutputSize(requestData.length)];
-      cipher.processBytes(requestData, 0, requestData.length, ciphertext, 0);
+      byte[] cipherTextCandidate = new byte[cipher.getUpdateOutputSize(requestData.length)];
+      cipher.processBytes(requestData, 0, requestData.length, cipherTextCandidate, 0);
 
-      byte[] tag = new byte[cipher.getOutputSize(0)];
-      cipher.doFinal(tag, 0);
+      byte[] macCandidate = new byte[cipher.getOutputSize(0)];
+      cipher.doFinal(macCandidate, 0);
 
-      return new DiscoveryRequest(addressBook.size(), remoteAttestation.getRequestId(), nonce, ciphertext, tag);
+      byte[] cipherText = cipherTextCandidate;
+      byte[] mac        = macCandidate;
+
+      int overflow = macCandidate.length - MAC_LENGTH_BYTES;
+      if (overflow > 0) {
+        mac = new byte[MAC_LENGTH_BYTES];
+        System.arraycopy(macCandidate, overflow, mac, 0, mac.length);
+
+        cipherText = new byte[cipherText.length + overflow];
+        System.arraycopy(cipherTextCandidate, 0, cipherText, 0, cipherTextCandidate.length);
+        System.arraycopy(macCandidate, 0, cipherText, cipherText.length - overflow, overflow);
+      }
+
+      return new DiscoveryRequest(addressBook.size(), remoteAttestation.getRequestId(), nonce, cipherText, mac);
     } catch (IOException | InvalidCipherTextException e) {
       throw new AssertionError(e);
     }
