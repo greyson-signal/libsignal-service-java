@@ -452,7 +452,7 @@ public class PushServiceSocket {
   public Pair<RemoteAttestationResponse, List<String>> getContactDiscoveryRemoteAttestation(String authorization, RemoteAttestationRequest request, String mrenclave)
       throws IOException
   {
-    Response     response   = makeContactDiscoveryRequest(authorization, new LinkedList<String>(), "/v1/attestation/" + mrenclave, "PUT", JsonUtil.toJson(request));
+    Response     response   = makeContactDiscoveryRequest(authorization, new LinkedList<String>(), "/v1/attestation/test/untrusted-certificates/" + mrenclave, "PUT", JsonUtil.toJson(request));
     ResponseBody body       = response.body();
     List<String> rawCookies = response.headers("Set-Cookie");
     List<String> cookies    = new LinkedList<>();
@@ -478,6 +478,30 @@ public class PushServiceSocket {
     } else {
       throw new NonSuccessfulResponseCodeException("Empty response!");
     }
+  }
+
+  public void reportContactDiscoveryServiceMatch() throws IOException {
+    makeServiceRequest("/v1/directory/feedback/ok", "PUT", "");
+  }
+
+  public void reportContactDiscoveryServiceMismatch() throws IOException {
+    makeServiceRequest("/v1/directory/feedback/mismatch", "PUT", "");
+  }
+
+  public void reportContactDiscoveryServiceServerError() throws IOException {
+    makeServiceRequest("/v1/directory/feedback/server-error", "PUT", "");
+  }
+
+  public void reportContactDiscoveryServiceClientError() throws IOException {
+    makeServiceRequest("/v1/directory/feedback/client-error", "PUT", "");
+  }
+
+  public void reportContactDiscoveryServiceAttestationError() throws IOException {
+    makeServiceRequest("/v1/directory/feedback/attestation-error", "PUT", "");
+  }
+
+  public void reportContactDiscoveryServiceUnexpectedError() throws IOException {
+    makeServiceRequest("/v1/directory/feedback/unexpected-error", "PUT", "");
   }
 
   public TurnServerInfo getTurnServerInfo() throws IOException {
@@ -888,8 +912,6 @@ public class PushServiceSocket {
     try {
       response = call.execute();
 
-      Log.e("SPIDERMAN", "response: " + response.toString());
-
       if (response.isSuccessful()) {
         return response;
       }
@@ -901,7 +923,7 @@ public class PushServiceSocket {
       }
     }
 
-    throw new NonSuccessfulResponseCodeException("Response: " + response);
+    throw new NonSuccessfulResponseCodeException("Response: " + response, response.code());
   }
 
   private ConnectionHolder[] createConnectionHolders(SignalUrl[] urls) {

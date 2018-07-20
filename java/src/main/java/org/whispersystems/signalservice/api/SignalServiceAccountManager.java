@@ -16,6 +16,7 @@ import org.whispersystems.libsignal.IdentityKey;
 import org.whispersystems.libsignal.IdentityKeyPair;
 import org.whispersystems.libsignal.InvalidKeyException;
 import org.whispersystems.libsignal.ecc.ECPublicKey;
+import org.whispersystems.libsignal.logging.Log;
 import org.whispersystems.libsignal.state.PreKeyRecord;
 import org.whispersystems.libsignal.state.SignedPreKeyRecord;
 import org.whispersystems.libsignal.util.Pair;
@@ -49,7 +50,6 @@ import org.whispersystems.signalservice.internal.util.Util;
 
 import java.io.IOException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -70,6 +70,8 @@ import static org.whispersystems.signalservice.internal.push.ProvisioningProtos.
  * @author Moxie Marlinspike
  */
 public class SignalServiceAccountManager {
+
+  private static final String TAG = SignalServiceAccountManager.class.getSimpleName();
 
   private final PushServiceSocket pushServiceSocket;
   private final String            user;
@@ -303,6 +305,54 @@ public class SignalServiceAccountManager {
       return results;
     } catch (InvalidCipherTextException e) {
       throw new UnauthenticatedResponseException(e);
+    }
+  }
+
+  public void reportContactDiscoveryServiceMatch() {
+    try {
+      this.pushServiceSocket.reportContactDiscoveryServiceMatch();
+    } catch (IOException e) {
+      Log.w(TAG, "Request to indicate a contact discovery result match failed. Ignoring.", e);
+    }
+  }
+
+  public void reportContactDiscoveryServiceMismatch() {
+    try {
+      this.pushServiceSocket.reportContactDiscoveryServiceMismatch();
+    } catch (IOException e) {
+      Log.w(TAG, "Request to indicate a contact discovery result mismatch failed. Ignoring.", e);
+    }
+  }
+
+  public void reportContactDiscoveryServiceServerError() {
+    try {
+      this.pushServiceSocket.reportContactDiscoveryServiceServerError();
+    } catch (IOException e) {
+      Log.w(TAG, "Request to indicate a contact discovery server error failed. Ignoring.", e);
+    }
+  }
+
+  public void reportContactDiscoveryServiceClientError() {
+    try {
+      this.pushServiceSocket.reportContactDiscoveryServiceClientError();
+    } catch (IOException e) {
+      Log.w(TAG, "Request to indicate a contact discovery client error failed. Ignoring.", e);
+    }
+  }
+
+  public void reportContactDiscoveryServiceAttestationError() {
+    try {
+      this.pushServiceSocket.reportContactDiscoveryServiceAttestationError();
+    } catch (IOException e) {
+      Log.w(TAG, "Request to indicate a contact discovery attestation error failed. Ignoring.", e);
+    }
+  }
+
+  public void reportContactDiscoveryServiceUnexpectedError() {
+    try {
+      this.pushServiceSocket.reportContactDiscoveryServiceUnexpectedError();
+    } catch (IOException e) {
+      Log.w(TAG, "Request to indicate a contact discovery unexpected error failed. Ignoring.", e);
     }
   }
 
