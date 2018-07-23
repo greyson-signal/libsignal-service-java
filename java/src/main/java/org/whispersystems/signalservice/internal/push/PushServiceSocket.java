@@ -445,8 +445,8 @@ public class PushServiceSocket {
 
   public String getContactDiscoveryAuthorization() throws IOException {
     String response = makeServiceRequest(DIRECTORY_AUTH_PATH, "GET", null);
-    AuthorizationToken token = JsonUtil.fromJson(response, AuthorizationToken.class);
-    return Credentials.basic(token.getUsername(), token.getToken());
+    ContactDiscoveryCredentials token = JsonUtil.fromJson(response, ContactDiscoveryCredentials.class);
+    return Credentials.basic(token.getUsername(), token.getPassword());
   }
 
   public Pair<RemoteAttestationResponse, List<String>> getContactDiscoveryRemoteAttestation(String authorization, RemoteAttestationRequest request, String mrenclave)
