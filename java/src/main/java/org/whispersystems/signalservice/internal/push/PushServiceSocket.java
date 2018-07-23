@@ -452,7 +452,7 @@ public class PushServiceSocket {
   public Pair<RemoteAttestationResponse, List<String>> getContactDiscoveryRemoteAttestation(String authorization, RemoteAttestationRequest request, String mrenclave)
       throws IOException
   {
-    Response     response   = makeContactDiscoveryRequest(authorization, new LinkedList<String>(), "/v1/attestation/test/untrusted-certificates/" + mrenclave, "PUT", JsonUtil.toJson(request));
+    Response     response   = makeContactDiscoveryRequest(authorization, new LinkedList<String>(), "/v1/attestation/" + mrenclave, "PUT", JsonUtil.toJson(request));
     ResponseBody body       = response.body();
     List<String> rawCookies = response.headers("Set-Cookie");
     List<String> cookies    = new LinkedList<>();
@@ -923,7 +923,7 @@ public class PushServiceSocket {
       }
     }
 
-    throw new NonSuccessfulResponseCodeException("Response: " + response, response.code());
+    throw new NonSuccessfulResponseCodeException("Response: " + response);
   }
 
   private ConnectionHolder[] createConnectionHolders(SignalUrl[] urls) {

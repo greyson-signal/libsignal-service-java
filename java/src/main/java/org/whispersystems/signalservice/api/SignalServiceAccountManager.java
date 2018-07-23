@@ -324,22 +324,6 @@ public class SignalServiceAccountManager {
     }
   }
 
-  public void reportContactDiscoveryServiceServerError() {
-    try {
-      this.pushServiceSocket.reportContactDiscoveryServiceServerError();
-    } catch (IOException e) {
-      Log.w(TAG, "Request to indicate a contact discovery server error failed. Ignoring.", e);
-    }
-  }
-
-  public void reportContactDiscoveryServiceClientError() {
-    try {
-      this.pushServiceSocket.reportContactDiscoveryServiceClientError();
-    } catch (IOException e) {
-      Log.w(TAG, "Request to indicate a contact discovery client error failed. Ignoring.", e);
-    }
-  }
-
   public void reportContactDiscoveryServiceAttestationError() {
     try {
       this.pushServiceSocket.reportContactDiscoveryServiceAttestationError();
