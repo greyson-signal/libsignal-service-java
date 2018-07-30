@@ -7,7 +7,6 @@ import org.spongycastle.crypto.engines.AESFastEngine;
 import org.spongycastle.crypto.modes.GCMBlockCipher;
 import org.spongycastle.crypto.params.AEADParameters;
 import org.spongycastle.crypto.params.KeyParameter;
-import org.spongycastle.pqc.math.linearalgebra.ByteUtils;
 import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.Period;
@@ -57,8 +56,8 @@ public class ContactDiscoveryCipher {
       byte[] cipherText2 = new byte[cipher.getOutputSize(0)];
       cipher.doFinal(cipherText2, 0);
 
-      byte[]   cipherText = ByteUtils.concatenate(cipherText1, cipherText2);
-      byte[][] parts      = ByteUtils.split(cipherText, cipherText.length - TAG_LENGTH_BYTES);
+      byte[]   cipherText = ByteUtil.combine(cipherText1, cipherText2);
+      byte[][] parts      = ByteUtil.split(cipherText, cipherText.length - TAG_LENGTH_BYTES, TAG_LENGTH_BYTES);
 
       return new DiscoveryRequest(addressBook.size(), remoteAttestation.getRequestId(), nonce, parts[0], parts[1]);
     } catch (IOException | InvalidCipherTextException e) {
