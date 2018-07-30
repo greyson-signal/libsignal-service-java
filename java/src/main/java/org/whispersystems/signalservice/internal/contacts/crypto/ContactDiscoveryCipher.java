@@ -1,6 +1,7 @@
 package org.whispersystems.signalservice.internal.contacts.crypto;
 
 
+import org.apache.http.util.TextUtils;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.crypto.engines.AESFastEngine;
 import org.spongycastle.crypto.modes.GCMBlockCipher;
@@ -101,6 +102,10 @@ public class ContactDiscoveryCipher {
   public void verifyIasSignature(KeyStore trustStore, String certificates, String signatureBody, String signature, Quote quote)
       throws SignatureException
   {
+    if (TextUtils.isEmpty(certificates)) {
+      throw new SignatureException("No certificates.");
+    }
+
     try {
       SigningCertificate signingCertificate = new SigningCertificate(certificates, trustStore);
       signingCertificate.verifySignature(signatureBody, signature);
